@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 import sqlite3
 
 app = Flask(__name__)
@@ -26,9 +26,10 @@ def check_ticket():
                             WHERE id={};'''.format(id))
             conn.commit()
             conn.close()
-            return jsonify({'status': 'valid'})
+
+            return "<p style='color: #70AD47; font-size: 50px; font-family: Lucida Console'>Valid ID: {}</p>".format(id)
         else:
-            return jsonify({'status': 'invalid'})
+            return "<p style='color: #ED7D31; font-size: 50px; font-family: Lucida Console;'>Code already scanned for ID: {}</p>".format(id)
     else:
         return jsonify({'status': 'unknown'})
 
