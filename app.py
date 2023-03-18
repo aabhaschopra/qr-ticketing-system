@@ -1,5 +1,5 @@
-from flask import Flask, jsonify, request, render_template
-import sqlite3
+from flask import Flask, jsonify, request
+import mysql.connector
 
 app = Flask(__name__)
 
@@ -12,19 +12,25 @@ def check_ticket():
     # Retrieve the QR code from the request parameters
     id = request.args.get('id')
 
-    connection = sqlite3.connect('tickets.db')
+    connection = mysql.connector.connect(
+    	host = "<your-username>.mysql.pythonanywhere-services.com",
+    	user = "<your-username>",
+    	password = "<your-password>",
+    	database = "<your-username>$tickets"
+    )
 
-    cursor = connection.execute('''SELECT status FROM tickets
-                             WHERE id={};'''.format(id))
+    cursor = connection.cursor()
+    cursor.execute('''SELECT status FROM tickets
+                               WHERE id={};'''.format(id))
     result = cursor.fetchone()
 
     if result is not None:
         status = result[0]
         if status == 'unused':
-            connection.execute('''UPDATE tickets
+            cursor.execute('''UPDATE tickets
                             SET status='used'
                             WHERE id={};'''.format(id))
-            
+
             connection.commit()
             connection.close()
 
@@ -35,4 +41,4 @@ def check_ticket():
         return jsonify({'status': 'unknown'})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run()
