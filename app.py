@@ -12,20 +12,21 @@ def check_ticket():
     # Retrieve the QR code from the request parameters
     id = request.args.get('id')
 
-    conn = sqlite3.connect('tickets.db')
+    connection = sqlite3.connect('tickets.db')
 
-    cursor = conn.execute('''SELECT status FROM tickets
+    cursor = connection.execute('''SELECT status FROM tickets
                              WHERE id={};'''.format(id))
     result = cursor.fetchone()
 
     if result is not None:
         status = result[0]
         if status == 'unused':
-            conn.execute('''UPDATE tickets
+            connection.execute('''UPDATE tickets
                             SET status='used'
                             WHERE id={};'''.format(id))
-            conn.commit()
-            conn.close()
+            
+            connection.commit()
+            connection.close()
 
             return "<p style='color: #70AD47; font-size: 50px; font-family: Lucida Console'>Valid ID: {}</p>".format(id)
         else:

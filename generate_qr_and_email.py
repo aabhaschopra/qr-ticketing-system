@@ -5,6 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 import sqlite3
+import io
 
 sender_email = 'your_email@gmail.com'
 sender_password = 'your_password'
@@ -45,15 +46,19 @@ for id in tickets:
     message.attach(qr_code)
     
     # Connect to the SMTP server and send the email
-    with smtplib.SMTP('smtp.gmail.com', 587) as server:
+    with smtplib.SMTP('smtp-relay.gmail.com', 587) as server:
         server.starttls()
         server.login(sender_email, sender_password)
         server.sendmail(sender_email, tickets[id], message.as_string())
 
-    conn = sqlite3.connect('tickets.db')
+    connection = sqlite3.connect('tickets.db')
 
-    conn.execute('''INSERT INTO tickets
+    connection.execute("""CREATE TABLE IF NOT EXISTS tickets
+                      (id INT PRIMARY KEY NOT NULL,
+                      status TEXT NOT NULL);""")
+
+    connection.execute('''INSERT INTO tickets
                     VALUES ({}, 'unused');'''.format(id))
     
-    conn.commit()
-    conn.close()
+    connection.commit()
+    connection.close()
